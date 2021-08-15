@@ -6,7 +6,8 @@
 MAKEFLAGS 			:= -j $(shell nproc)
 SRC_EXT      		:= c
 OBJ_EXT				:= o
-CC 					:= gcc
+#CC 					:= $(CXX)
+
 
 SRC_DIR				:= ./
 WORKING_DIR			:= ./build
@@ -20,34 +21,45 @@ WARNINGS 			:= -Wall -Wextra \
 						-Wno-unused-parameter -Wno-missing-field-initializers -Wno-format-nonliteral -Wno-cast-qual -Wunreachable-code -Wno-switch-default  \
 					  	-Wreturn-type -Wmultichar -Wformat-security -Wno-ignored-qualifiers -Wno-error=pedantic -Wno-sign-compare -Wno-error=missing-prototypes -Wdouble-promotion -Wclobbered -Wdeprecated  \
 						-Wempty-body -Wshift-negative-value -Wstack-usage=2048 \
-            			-Wtype-limits -Wsizeof-pointer-memaccess -Wpointer-arith
+            			-Wtype-limits -Wsizeof-pointer-memaccess -Wpointer-arith -fpermissive
 
-CFLAGS 				:= -O0 -g $(WARNINGS)
+CFLAGS := -MMD -MP -O0 -g $(WARNINGS)
+CXXFLAGS:= -MMD -MP -g -std=c++14
 
 # Add simulator define to allow modification of source
-DEFINES				:= -D SIMULATOR=1 -D LV_BUILD_TEST=0
+DEFINES				:= -D SIMULATOR=1 -D LV_BUILD_TEST=0 -D LV_LVGL_H_INCLUDE_SIMPLE=1
 
 # Include simulator inc folder first so lv_conf.h from custom UI can be used instead
-INC 				:= -I./ui/simulator/inc/ -I./ -I./lvgl/
+INC 				:= -I./ui/simulator/inc/ -I./ -I./lvgl/ -I./main/include
 LDFLAGS 			:= -lSDL2 -lm
 BIN 				:= $(BIN_DIR)/demo
 
 COMPILE				= $(CC) $(CFLAGS) $(INC) $(DEFINES)
 
 # Automatically include all source files
-SRCS 				:= $(shell find $(SRC_DIR) -type f -name '*.c' -not -path '*/\.*')
-OBJECTS    			:= $(patsubst $(SRC_DIR)%,$(BUILD_DIR)/%,$(SRCS:.$(SRC_EXT)=.$(OBJ_EXT)))
+SRCS := $(shell find $(SRC_DIR) -type f -name '*.c' -o -name '*.cpp' -not -path '*/\.*')
+OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
+DEPS := $(OBJS:.o=.d)
 
-all: default
+$(BIN): $(OBJS)
+	$(MKDIR_P) $(dir $@)
+	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
 
-$(BUILD_DIR)/%.$(OBJ_EXT): $(SRC_DIR)/%.$(SRC_EXT)
-	@echo 'Building project file: $<'
-	@mkdir -p $(dir $@)
-	@$(COMPILE) -c -o "$@" "$<"
+# c source
+$(BUILD_DIR)/%.c.o: %.c
+	$(MKDIR_P) $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(INC) $(DEFINES) -c $< -o $@
 
-default: $(OBJECTS)
-	@mkdir -p $(BIN_DIR)
-	$(CC) -o $(BIN) $(OBJECTS) $(LDFLAGS)
+# c++ source
+$(BUILD_DIR)/%.cpp.o: %.cpp
+	$(MKDIR_P) $(dir $@)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(INC) $(DEFINES) -c $< -o $@
+
+.PHONY: clean
 
 clean:
-	rm -rf $(WORKING_DIR)
+	$(RM) -r $(BUILD_DIR)
+
+-include $(DEPS)
+
+MKDIR_P ?= mkdir -p

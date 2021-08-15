@@ -19,6 +19,9 @@
 #include "lv_drivers/indev/mouse.h"
 #include "lv_drivers/indev/keyboard.h"
 #include "lv_drivers/indev/mousewheel.h"
+#include "Screen.hpp"
+#include "ScrPinEntry.hpp"
+#include "ScrHome.hpp"
 
 /*********************
  *      DEFINES
@@ -57,6 +60,7 @@ static int tick_thread(void *data);
 /**********************
  *      VARIABLES
  **********************/
+lv_indev_t *kb_indev = nullptr;
 
 /**********************
  *  STATIC PROTOTYPES
@@ -65,6 +69,10 @@ static int tick_thread(void *data);
 /**********************
  *   GLOBAL FUNCTIONS
  **********************/
+void loadScreen(Screen* screen)
+{
+    screen->load(kb_indev);
+}
 
 int main(int argc, char **argv)
 {
@@ -95,11 +103,17 @@ int main(int argc, char **argv)
 //  lv_example_flex_3();
 //  lv_example_label_1();
 
-  lv_demo_widgets();
+//  lv_demo_widgets();
 //  lv_demo_keypad_encoder();
 //  lv_demo_benchmark();
 //  lv_demo_stress();
 //  lv_demo_music();
+
+lv_obj_t *tabview = lv_tabview_create(lv_scr_act(), LV_DIR_TOP, 0);
+    Screen* pinEntry = new ScrPinEntry(tabview, nullptr, nullptr);
+    Screen* home = new ScrHome(tabview, pinEntry, nullptr);
+    pinEntry->setNext(home);
+    loadScreen(pinEntry);
 
   while(1) {
     /* Periodically call the lv_task handler.
@@ -141,6 +155,7 @@ static void hal_init(void)
   disp_drv.flush_cb = monitor_flush;
   disp_drv.hor_res = MONITOR_HOR_RES;
   disp_drv.ver_res = MONITOR_VER_RES;
+  disp_drv.dpi = LV_DPI_DEF;
   disp_drv.antialiasing = 1;
 
   lv_disp_t * disp = lv_disp_drv_register(&disp_drv);
@@ -167,7 +182,7 @@ static void hal_init(void)
   lv_indev_drv_init(&indev_drv_2); /*Basic initialization*/
   indev_drv_2.type = LV_INDEV_TYPE_KEYPAD;
   indev_drv_2.read_cb = keyboard_read;
-  lv_indev_t *kb_indev = lv_indev_drv_register(&indev_drv_2);
+  kb_indev = lv_indev_drv_register(&indev_drv_2);
   lv_indev_set_group(kb_indev, g);
   mousewheel_init();
   static lv_indev_drv_t indev_drv_3;
