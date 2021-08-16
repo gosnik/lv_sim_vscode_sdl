@@ -6,6 +6,7 @@
 MAKEFLAGS 			:= -j $(shell nproc)
 SRC_EXT      		:= c
 OBJ_EXT				:= o
+SRC_DIR				:= src
 #CC 					:= $(CXX)
 
 
@@ -24,20 +25,23 @@ WARNINGS 			:= -Wall -Wextra \
             			-Wtype-limits -Wsizeof-pointer-memaccess -Wpointer-arith -fpermissive
 
 CFLAGS := -MMD -MP -O0 -g $(WARNINGS)
-CXXFLAGS:= -MMD -MP -g -std=c++14
+CXXFLAGS:= -MMD -MP -O0 -g -std=c++14
 
 # Add simulator define to allow modification of source
 DEFINES				:= -D SIMULATOR=1 -D LV_BUILD_TEST=0 -D LV_LVGL_H_INCLUDE_SIMPLE=1
 
 # Include simulator inc folder first so lv_conf.h from custom UI can be used instead
-INC 				:= -I./ui/simulator/inc/ -I./ -I./lvgl/ -I./main/include
+INC 				:= -I./ui/simulator/inc/ -I./ -I./lvgl/ -I./main/include -I./qtvault/include
 LDFLAGS 			:= -lSDL2 -lm
 BIN 				:= $(BIN_DIR)/demo
 
 COMPILE				= $(CC) $(CFLAGS) $(INC) $(DEFINES)
 
 # Automatically include all source files
-SRCS := $(shell find $(SRC_DIR) -type f -name '*.c' -o -name '*.cpp' -not -path '*/\.*')
+SRCS := $(shell find lv_drivers -type f -name '*.c' -o -name '*.cpp' -not -path '*/\.*')
+SRCS += $(shell find lvgl -type f -name '*.c' -o -name '*.cpp' -not -path '*/\.*')
+SRCS += $(shell find main -type f -name '*.c' -o -name '*.cpp' -not -path '*/\.*')
+SRCS += $(shell find qtvault/src/menu -type f -name '*.c' -o -name '*.cpp' -not -path '*/\.*')
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 

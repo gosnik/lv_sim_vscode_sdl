@@ -7,3 +7,6 @@
 [submodule "lvgl"]
 	path = lvgl
 	url = https://github.com/gosnik/lvgl.git
+[submodule "qtvault"]
+	path = qtvault
+	url = https://gosnik@bitbucket.org/gosnik/qtvault.git

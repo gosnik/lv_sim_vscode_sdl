@@ -19,9 +19,9 @@
 #include "lv_drivers/indev/mouse.h"
 #include "lv_drivers/indev/keyboard.h"
 #include "lv_drivers/indev/mousewheel.h"
-#include "Screen.hpp"
-#include "ScrPinEntry.hpp"
-#include "ScrHome.hpp"
+#include "menu/Screen.hpp"
+#include "menu/ScrPinEntry.hpp"
+#include "menu/ScrHome.hpp"
 
 /*********************
  *      DEFINES
@@ -110,10 +110,9 @@ int main(int argc, char **argv)
 //  lv_demo_music();
 
 lv_obj_t *tabview = lv_tabview_create(lv_scr_act(), LV_DIR_TOP, 0);
-    Screen* pinEntry = new ScrPinEntry(tabview, nullptr, nullptr);
-    Screen* home = new ScrHome(tabview, pinEntry, nullptr);
-    pinEntry->setNext(home);
-    loadScreen(pinEntry);
+    //Screen* pinEntry = new ScrPinEntry(tabview, LV_SYMBOL_WARNING " Unlock", false);
+    Screen* home = new ScrHome(tabview, LV_SYMBOL_HOME " Home");
+    home->load(kb_indev);
 
   while(1) {
     /* Periodically call the lv_task handler.
