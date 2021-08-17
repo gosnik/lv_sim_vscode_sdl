@@ -32,7 +32,7 @@ DEFINES				:= -D SIMULATOR=1 -D LV_BUILD_TEST=0 -D LV_LVGL_H_INCLUDE_SIMPLE=1
 
 # Include simulator inc folder first so lv_conf.h from custom UI can be used instead
 INC 				:= -I./ui/simulator/inc/ -I./ -I./lvgl/ -I./main/include -I./qtvault/include
-LDFLAGS 			:= -lSDL2 -lm
+LDFLAGS 			:= -lSDL2 -lm -lpthread
 BIN 				:= $(BIN_DIR)/demo
 
 COMPILE				= $(CC) $(CFLAGS) $(INC) $(DEFINES)
@@ -42,6 +42,7 @@ SRCS := $(shell find lv_drivers -type f -name '*.c' -o -name '*.cpp' -not -path 
 SRCS += $(shell find lvgl -type f -name '*.c' -o -name '*.cpp' -not -path '*/\.*')
 SRCS += $(shell find main -type f -name '*.c' -o -name '*.cpp' -not -path '*/\.*')
 SRCS += $(shell find qtvault/src/menu -type f -name '*.c' -o -name '*.cpp' -not -path '*/\.*')
+SRCS += $(shell find qtvault/src/util -type f -name '*.c' -o -name '*.cpp' -not -path '*/\.*')
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 

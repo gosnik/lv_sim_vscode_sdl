@@ -20,8 +20,9 @@
 #include "lv_drivers/indev/keyboard.h"
 #include "lv_drivers/indev/mousewheel.h"
 #include "menu/Screen.hpp"
-#include "menu/ScrPinEntry.hpp"
+#include "menu/ScrEntry.hpp"
 #include "menu/ScrHome.hpp"
+#include "menu/Factory.hpp"
 
 /*********************
  *      DEFINES
@@ -69,9 +70,9 @@ lv_indev_t *kb_indev = nullptr;
 /**********************
  *   GLOBAL FUNCTIONS
  **********************/
-void loadScreen(Screen* screen)
+void loadScreen(Screen *screen)
 {
-    screen->load(kb_indev);
+  screen->load(kb_indev);
 }
 
 int main(int argc, char **argv)
@@ -85,36 +86,38 @@ int main(int argc, char **argv)
   /*Initialize the HAL (display, input devices, tick) for LVGL*/
   hal_init();
 
-//  lv_example_switch_1();
-//  lv_example_calendar_1();
-//  lv_example_btnmatrix_2();
-//  lv_example_checkbox_1();
-//  lv_example_colorwheel_1();
-//  lv_example_chart_6();
-//  lv_example_table_2();
-//  lv_example_scroll_2();
-//  lv_example_textarea_1();
-//  lv_example_msgbox_1();
-//  lv_example_dropdown_2();
-//  lv_example_btn_1();
-//  lv_example_scroll_1();
-//  lv_example_tabview_1();
-//  lv_example_tabview_1();
-//  lv_example_flex_3();
-//  lv_example_label_1();
+  //  lv_example_switch_1();
+  //  lv_example_calendar_1();
+  //  lv_example_btnmatrix_2();
+  //  lv_example_checkbox_1();
+  //  lv_example_colorwheel_1();
+  //  lv_example_chart_6();
+  //  lv_example_table_2();
+  //  lv_example_scroll_2();
+  //  lv_example_textarea_1();
+  //  lv_example_msgbox_1();
+  //  lv_example_dropdown_2();
+  //  lv_example_btn_1();
+  //  lv_example_scroll_1();
+  //  lv_example_tabview_1();
+  //  lv_example_tabview_1();
+  //  lv_example_flex_3();
+  //  lv_example_label_1();
 
-//  lv_demo_widgets();
-//  lv_demo_keypad_encoder();
-//  lv_demo_benchmark();
-//  lv_demo_stress();
-//  lv_demo_music();
+  //  lv_demo_widgets();
+  //  lv_demo_keypad_encoder();
+  //  lv_demo_benchmark();
+  //  lv_demo_stress();
+  //  lv_demo_music();
 
-lv_obj_t *tabview = lv_tabview_create(lv_scr_act(), LV_DIR_TOP, 0);
-    //Screen* pinEntry = new ScrPinEntry(tabview, LV_SYMBOL_WARNING " Unlock", false);
-    Screen* home = new ScrHome(tabview, LV_SYMBOL_HOME " Home");
-    home->load(kb_indev);
+  lv_obj_t *tabview = lv_tabview_create(lv_scr_act(), LV_DIR_TOP, 0);
+  //Screen *entry = new ScrEntry(tabview, LV_SYMBOL_WARNING " Unlock", ENTRY_ALPHA);
+  //Screen *home = new ScrHome(tabview, LV_SYMBOL_HOME " Home");
+  Screen *home = Factory::R().get<ScrHome>(tabview, LV_SYMBOL_HOME " Home");
+  home->load(kb_indev);
 
-  while(1) {
+  while (1)
+  {
     /* Periodically call the lv_task handler.
      * It could be done in a timer interrupt or an OS task too.*/
     lv_timer_handler();
@@ -157,12 +160,12 @@ static void hal_init(void)
   disp_drv.dpi = LV_DPI_DEF;
   disp_drv.antialiasing = 1;
 
-  lv_disp_t * disp = lv_disp_drv_register(&disp_drv);
+  lv_disp_t *disp = lv_disp_drv_register(&disp_drv);
 
-  lv_theme_t * th = lv_theme_default_init(disp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), LV_THEME_DEFAULT_DARK, LV_FONT_DEFAULT);
+  lv_theme_t *th = lv_theme_default_init(disp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), LV_THEME_DEFAULT_DARK, LV_FONT_DEFAULT);
   lv_disp_set_theme(disp, th);
 
-  lv_group_t * g = lv_group_create();
+  lv_group_t *g = lv_group_create();
   lv_group_set_default(g);
 
   /* Add the mouse as input device
@@ -189,14 +192,14 @@ static void hal_init(void)
   indev_drv_3.type = LV_INDEV_TYPE_ENCODER;
   indev_drv_3.read_cb = mousewheel_read;
 
-  lv_indev_t * enc_indev = lv_indev_drv_register(&indev_drv_3);
+  lv_indev_t *enc_indev = lv_indev_drv_register(&indev_drv_3);
   lv_indev_set_group(enc_indev, g);
 
   /*Set a cursor for the mouse*/
-  LV_IMG_DECLARE(mouse_cursor_icon); /*Declare the image file.*/
-  lv_obj_t * cursor_obj = lv_img_create(lv_scr_act()); /*Create an image object for the cursor */
-  lv_img_set_src(cursor_obj, &mouse_cursor_icon);           /*Set the image source*/
-  lv_indev_set_cursor(mouse_indev, cursor_obj);             /*Connect the image  object to the driver*/
+  LV_IMG_DECLARE(mouse_cursor_icon);                  /*Declare the image file.*/
+  lv_obj_t *cursor_obj = lv_img_create(lv_scr_act()); /*Create an image object for the cursor */
+  lv_img_set_src(cursor_obj, &mouse_cursor_icon);     /*Set the image source*/
+  lv_indev_set_cursor(mouse_indev, cursor_obj);       /*Connect the image  object to the driver*/
 }
 
 /**
@@ -204,10 +207,12 @@ static void hal_init(void)
  * @param data unused
  * @return never return
  */
-static int tick_thread(void *data) {
+static int tick_thread(void *data)
+{
   (void)data;
 
-  while(1) {
+  while (1)
+  {
     SDL_Delay(5);
     lv_tick_inc(5); /*Tell LittelvGL that 5 milliseconds were elapsed*/
   }
