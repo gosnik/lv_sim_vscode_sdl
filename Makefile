@@ -25,7 +25,7 @@ WARNINGS 			:= -Wall -Wextra \
             			-Wtype-limits -Wsizeof-pointer-memaccess -Wpointer-arith -fpermissive
 
 CFLAGS := -MMD -MP -O0 -g $(WARNINGS)
-CXXFLAGS:= -MMD -MP -O0 -g -std=c++14
+CXXFLAGS:= -MMD -MP -O0 -g -std=c++17
 
 # Add simulator define to allow modification of source
 DEFINES				:= -D SIMULATOR=1 -D LV_BUILD_TEST=0 -D LV_LVGL_H_INCLUDE_SIMPLE=1
